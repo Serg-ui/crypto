@@ -28,30 +28,26 @@ if __name__ == '__main__':
         filename = askopenfilename()
         keyword = input('keyword: ')
 
-        file = open(filename, 'rb')
-        data = file.read()
-        file.close()
+        with open(filename, 'rb') as f:
+            data = f.read()
 
         encrypt_data = encrypt(data, set_key(keyword))
 
-        encrypt_file = asksaveasfile(mode='wb')
-        encrypt_file.write(encrypt_data)
-        encrypt_file.close()
+        with asksaveasfile(mode='wb') as f:
+            f.write(encrypt_data)
 
     elif command == '2':
         filename = askopenfilename()
-        encrypted_file = open(filename, 'rb')
-        encrypted_data = encrypted_file.read()
+
+        with open(filename, 'rb') as f:
+            encrypted_data = f.read()
 
         keyword = input('keyword: ')
         decrypted_data = decrypt(encrypted_data, set_key(keyword))
-        encrypted_file.close()
 
-        decr_file = open('decr', 'wb')
-        decr_file.write(decrypted_data)
-        decr_file.close()
-
-        webbrowser.open(decr_file.name)
+        with open('decr', 'wb') as f:
+            f.write(decrypted_data)
+            webbrowser.open(f.name)
 
     else:
         print('wrong command')
