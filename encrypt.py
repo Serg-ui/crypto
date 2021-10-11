@@ -1,7 +1,7 @@
 from cryptography.fernet import Fernet
 import base64
 import hashlib
-from tkinter.filedialog import askopenfilename
+from tkinter.filedialog import askopenfilename, asksaveasfile
 import webbrowser
 
 
@@ -25,7 +25,18 @@ if __name__ == '__main__':
     command = input("Type '1' to encrypt, or '2' to decrypt: ")
 
     if command == '1':
-        pass
+        filename = askopenfilename()
+        keyword = input('keyword: ')
+
+        file = open(filename, 'rb')
+        data = file.read()
+        file.close()
+
+        encrypt_data = encrypt(data, set_key(keyword))
+
+        encrypt_file = asksaveasfile(mode='wb')
+        encrypt_file.write(encrypt_data)
+        encrypt_file.close()
 
     elif command == '2':
         filename = askopenfilename()
