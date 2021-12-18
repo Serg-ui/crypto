@@ -16,6 +16,13 @@ class Cipher(ABC):
             ).digest()
         )
 
+    @staticmethod
+    def file_reader():
+        filename = askopenfilename()
+        with open(filename, 'rb') as f:
+            data = f.read()
+        return data
+
     @abstractmethod
     def action(self):
         pass
@@ -24,11 +31,8 @@ class Cipher(ABC):
 class Encrypt(Cipher):
     def action(self):
         print('choose file')
-        filename = askopenfilename()
+        data = self.file_reader()
         keyword = input('keyword: ')
-
-        with open(filename, 'rb') as f:
-            data = f.read()
 
         self.lib = Fernet(self.set_key(keyword))
         encrypted_data = self.lib.encrypt(data)
@@ -40,10 +44,7 @@ class Encrypt(Cipher):
 class Decrypt(Cipher):
     def action(self):
         print('choose file')
-        filename = askopenfilename()
-
-        with open(filename, 'rb') as f:
-            encrypted_data = f.read()
+        encrypted_data = self.file_reader()
 
         key = input('keyword: ')
 
