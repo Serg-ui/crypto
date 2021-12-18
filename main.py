@@ -1,53 +1,73 @@
-from cryptography.fernet import Fernet
+from abc import ABC, abstractmethod
+from cryptography.fernet import Fernet, InvalidToken
+from tkinter.filedialog import askopenfilename, asksaveasfile
 import base64
 import hashlib
-from tkinter.filedialog import askopenfilename, asksaveasfile
-import webbrowser
 
 
-def set_key(string: str):
-    return base64.urlsafe_b64encode(hashlib.sha256(string.encode('utf-8')).digest())
+class Cipher(ABC):
+    lib: Fernet
+
+    @staticmethod
+    def set_key(string: str):
+        return base64.urlsafe_b64encode(
+            hashlib.sha256(
+                string.encode('utf-8')
+            ).digest()
+        )
+
+    @abstractmethod
+    def action(self):
+        pass
 
 
-def encrypt(data, keyword):
-    f = Fernet(keyword)
-    encrypted_data = f.encrypt(data)
-
-    return encrypted_data
-
-
-def decrypt(data, keyword):
-    f = Fernet(keyword)
-    return f.decrypt(data)
-
-
-if __name__ == '__main__':
-    command = input("Type '1' to encrypt, or '2' to decrypt: ")
-
-    if command == '1':
+class Encrypt(Cipher):
+    def action(self):
+        print('choose file')
         filename = askopenfilename()
         keyword = input('keyword: ')
 
         with open(filename, 'rb') as f:
             data = f.read()
 
-        encrypt_data = encrypt(data, set_key(keyword))
+        self.lib = Fernet(self.set_key(keyword))
+        encrypted_data = self.lib.encrypt(data)
 
         with asksaveasfile(mode='wb') as f:
-            f.write(encrypt_data)
+            f.write(encrypted_data)
 
-    elif command == '2':
+
+class Decrypt(Cipher):
+    def action(self):
+        print('choose file')
         filename = askopenfilename()
 
         with open(filename, 'rb') as f:
             encrypted_data = f.read()
 
-        keyword = input('keyword: ')
-        decrypted_data = decrypt(encrypted_data, set_key(keyword))
+        key = input('keyword: ')
 
-        with open('decr', 'wb') as f:
-            f.write(decrypted_data)
-            webbrowser.open(f.name)
+        self.lib = Fernet(self.set_key(key))
+        try:
+            print(self.lib.decrypt(encrypted_data))
+        except InvalidToken:
+            print('wrong key')
 
-    else:
-        print('wrong command')
+
+class Dialog:
+    menu = {
+        '1': Encrypt(),
+        '2': Decrypt()
+    }
+
+    def start(self):
+        value = input('type 1 to encrypt, or 2 to decrypt: ')
+        try:
+            self.menu[value].action()
+        except KeyError:
+            print('wrong command')
+            self.start()
+
+
+d = Dialog()
+d.start()
